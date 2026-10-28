@@ -20,6 +20,9 @@ import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
 import { ImageProcessingConfiguration } from "@babylonjs/core/Materials/imageProcessingConfiguration";
 import { Texture } from "@babylonjs/core/Materials/Textures/texture";
+import { PostProcess } from "@babylonjs/core/PostProcesses/postProcess";
+import { Effect } from "@babylonjs/core/Materials/effect";
+import "@babylonjs/core/Shaders/postprocess.vertex";
 import type { Objeto3D, ObjetoMontado, Paleta, Frame, Ancora } from "./types";
 import { paletaPorId } from "./palettes";
 
@@ -235,6 +238,27 @@ export function criarCena(
   mkDir("fillW", new Vector3(0.5, -0.2, 0.6), new Color3(0.92, 0.96, 1), 1.5);
   const lAcc1 = mkDir("acc1", new Vector3(0.7, 0.3, -0.5), paleta.acento1, 1.4);
   const lAcc2 = mkDir("acc2", new Vector3(-0.4, 0.5, -0.7), paleta.acento2, 1.2);
+
+  // FUNDO TRANSPARENTE + LUZ ADITIVA: o blend aditivo soma a cor mas deixa o
+  // alpha em 0 (ALPHA_ADD nao escreve alpha). Pixel com cor e alpha 0 e invalido
+  // num canvas premultiplicado: o Chrome headless soma (por isso os prints
+  // mentiam), o Chrome de verdade no Mac descarta. Orbitas, linha do grafico e
+  // particulas sumiam e so o que e opaco (sol, planetas) aparecia. Um passe no
+  // fim poe alpha = brilho do pixel: em fundo escuro da a mesma leitura do
+  // aditivo e o navegador para de jogar fora.
+  if (transparente) {
+    Effect.ShadersStore["alphaDaLuzFragmentShader"] = `
+      precision highp float;
+      varying vec2 vUV;
+      uniform sampler2D textureSampler;
+      void main(void) {
+        vec4 c = texture2D(textureSampler, vUV);
+        gl_FragColor = vec4(c.rgb, max(c.a, max(c.r, max(c.g, c.b))));
+      }`;
+    const pp = new PostProcess("alphaDaLuz", "alphaDaLuz", null, null, 1, camera);
+    // o passe tira o antialias do canvas; MSAA no alvo devolve (WebGL2)
+    pp.samples = engine.webGLVersion > 1 ? 4 : 1;
+  }
 
   const glow = opts.glow ? new GlowLayer("glow", scene, { blurKernelSize: 24 }) : null;
   if (glow) glow.intensity = 0.45;
