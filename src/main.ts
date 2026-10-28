@@ -296,6 +296,25 @@ depoisDoLoad(() => {
       }
     });
   }
+  // nuvem dos serviços: só no computador (no celular o título não fica preso
+  // e a nuvem não tem onde morar), montada quando a seção se aproxima
+  const nuvemCv = $<HTMLCanvasElement>("[data-cloud-canvas]");
+  const servicos = $("#servicos");
+  if (nuvemCv && servicos && desktop.matches && !reduz) {
+    const obs = new IntersectionObserver(
+      (es) => {
+        if (!es[0].isIntersecting) return;
+        obs.disconnect();
+        import("./3d/cloud3d")
+          .then((m) => m.montarNuvem(nuvemCv, servicos))
+          .then(() => nuvemCv.parentElement?.classList.add("is-live"))
+          .catch((err) => console.warn("nuvem indisponível", err));
+      },
+      { rootMargin: "700px 0px" }
+    );
+    obs.observe(servicos);
+  }
+
   const canvas = $<HTMLCanvasElement>("[data-orbit-canvas]");
   const labels = $("[data-orbit-labels]");
   if (canvas && labels && orbit) {
