@@ -138,6 +138,13 @@ main,
   font-size: var(--t-h2);
   line-height: 0.98;
 }
+/* título de uma linha só, centralizado */
+.display--line {
+  font-size: clamp(2rem, 4.7vw, 5rem);
+  line-height: 1.04;
+  white-space: nowrap;
+  text-align: center;
+}
 .display--close {
   font-size: clamp(2.8rem, 8.6vw, 9.4rem);
   line-height: 0.92;
@@ -392,38 +399,32 @@ html.js .is-on .swash path {
   inset: 0;
   pointer-events: none;
 }
+/* rótulos dos planetas: texto limpo, sem caixinha, como no Lab */
 .olabel {
   position: absolute;
   left: 0;
   top: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 5px 10px 5px 8px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: rgba(6, 9, 15, 0.62);
-  font-family: var(--f-mono);
-  font-size: 0.68rem;
-  letter-spacing: 0.02em;
-  color: var(--ink);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: rgba(243, 245, 250, 0.82);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
   white-space: nowrap;
+  opacity: 0;
   will-change: transform, opacity;
 }
-.olabel i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--cyan);
-  box-shadow: 0 0 8px var(--cyan);
-}
 .olabel--sun {
-  padding: 7px 14px 7px 10px;
-  border-color: rgba(0, 242, 222, 0.45);
-  font-size: 0.74rem;
-  font-family: var(--f-display);
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+@media (max-width: 960px) {
+  .olabel {
+    font-size: 0.64rem;
+  }
+  .olabel--sun {
+    font-size: 0.76rem;
+  }
 }
 .orbit__titles {
   position: absolute;
@@ -629,6 +630,22 @@ h1.orbit__t.is-on {
   gap: var(--s-4);
   justify-items: start;
 }
+.services__cloud {
+  width: 100%;
+  height: min(46vh, 440px);
+  margin-top: -1rem;
+}
+.services__cloud canvas {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 0.9s var(--ease-out);
+  touch-action: pan-y;
+  outline: none;
+}
+.services__cloud.is-live canvas {
+  opacity: 1;
+}
 .stack {
   display: grid;
   gap: 5vh;
@@ -664,17 +681,6 @@ h1.orbit__t.is-on {
   display: flex;
   align-items: center;
   gap: clamp(0.8rem, 1.6vw, 1.3rem);
-}
-.card__n {
-  min-width: 1.1em;
-  font-weight: 600;
-  font-size: clamp(2.2rem, 3.4vw, 3.2rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
-  background: var(--accent);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
 }
 .card__logo {
   flex: none;
@@ -713,13 +719,8 @@ h1.orbit__t.is-on {
 }
 .ads__head {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: var(--s-3) var(--s-5);
+  justify-items: center;
   margin-bottom: var(--s-4);
-}
-.ads__head .lead {
-  max-width: 26em;
 }
 .ads__rail {
   overflow: hidden;
@@ -797,13 +798,8 @@ h1.orbit__t.is-on {
 }
 .sites__head {
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: var(--s-3) var(--s-5);
+  justify-items: center;
   margin-bottom: var(--s-4);
-}
-.sites__head .lead {
-  max-width: 26em;
 }
 .sites__rows {
   display: grid;
@@ -916,50 +912,19 @@ h1.orbit__t.is-on {
 .process {
   padding: var(--s-7) 0 var(--s-6);
 }
-.process__grid {
-  display: grid;
-  grid-template-columns: 6fr 5fr;
-  gap: var(--s-4);
-  align-items: start;
-  margin-top: var(--s-5);
-}
 .process__t {
   text-align: center;
 }
-/* a nuvem fica presa ao lado enquanto as etapas passam */
-.process__stage {
-  position: sticky;
-  top: 14vh;
-  order: 2;
-  height: 72vh;
-  border-radius: var(--r-3);
-}
-.process__canvas {
-  width: 100%;
-  height: 100%;
-  touch-action: pan-y;
-  outline: none;
-}
-.process__tag {
-  position: absolute;
-  left: 50%;
-  bottom: 6%;
-  transform: translateX(-50%);
-  padding: 7px 14px;
-  border: 1px solid var(--line-2);
-  border-radius: var(--r-pill);
-  background: rgba(6, 9, 15, 0.6);
-  font-family: var(--f-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-2);
+/* etapas + números + linha = um componente só, no centro da tela */
+.process__box {
+  width: min(860px, 100%);
+  margin: var(--s-5) auto 0;
 }
 .steps {
   position: relative;
   display: grid;
-  gap: clamp(3rem, 16vh, 9rem);
-  padding: 6vh 0 18vh clamp(3.5rem, 7vw, 6rem);
+  gap: clamp(3rem, 12vh, 7rem);
+  padding: 4vh 0 10vh clamp(3.5rem, 7vw, 6rem);
 }
 .step {
   position: relative;
@@ -1347,6 +1312,9 @@ html.js .reveal.is-in {
   .faq__grid > h2 {
     position: static;
   }
+  .services__cloud {
+    display: none;
+  }
   .dash__kpis {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -1354,24 +1322,12 @@ html.js .reveal.is-in {
     top: calc(12vh + var(--i) * 14px);
     min-height: 0;
   }
-  .ads__head,
-  .sites__head {
-    grid-template-columns: 1fr;
-  }
-  .process__grid {
-    grid-template-columns: 1fr;
-  }
-  /* celular: a nuvem fica presa no topo, pequena, e as etapas passam por baixo */
-  .process__stage {
-    order: 0;
-    top: 64px;
-    height: 34svh;
-    z-index: 2;
-    background: radial-gradient(closest-side, rgba(4, 6, 10, 0.92), rgba(4, 6, 10, 0.75) 70%, transparent);
+  .display--line {
+    white-space: normal;
+    font-size: clamp(2.1rem, 9.6vw, 3.6rem);
   }
   .steps {
-    gap: 22vh;
-    padding-top: 4vh;
+    gap: 4.5rem;
   }
   .step {
     grid-template-columns: 1fr;

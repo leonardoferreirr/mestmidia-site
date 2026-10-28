@@ -55,11 +55,7 @@ export function ceu(cv: HTMLCanvasElement, reduz: boolean) {
     const y = scrollY;
     ctx.fillStyle = "#04060a";
     ctx.fillRect(0, 0, W, H);
-    if (nebulosa) {
-      const desloc = (y * 0.04) % H;
-      ctx.globalAlpha = 1;
-      ctx.drawImage(nebulosa, 0, -desloc * 0.5, W, H);
-    }
+    if (nebulosa) ctx.drawImage(nebulosa, 0, 0, W, H); // fixa: deslocar abria emenda
     const t = now / 1000;
     for (const e of estrelas) {
       const py = (((e.y - y * (0.05 + e.z * 0.22)) % (H * 3)) + H * 3) % (H * 3);
