@@ -22,12 +22,19 @@ export async function montarOrbita(canvas: HTMLCanvasElement, camada: HTMLElemen
     scrollSource: () => alvo,
     transparente: true,
   });
+  // celular: renderizar em 3x de densidade é GPU queimando sem diferença visível
+  // num disco de partículas; 1.5x no celular e 2x no computador
+  const dpr = devicePixelRatio || 1;
+  h.scene.getEngine().setHardwareScalingLevel(1 / Math.min(dpr, matchMedia("(max-width: 960px)").matches ? 1.5 : 2));
 
   // por planeta: o SELO (logo do canal, do tamanho do planeta na tela) e o
   // RÓTULO (nome, some na transformação). O selo acompanha o planeta até ele
   // virar ponto do gráfico: a linha passa a ligar as logos.
   const celular = matchMedia("(max-width: 960px)");
-  const itens = new Map<string, { selo?: HTMLElement; rot: HTMLElement }>();
+  // cache do último valor escrito: com 13 selos + rótulos, reescrever estilo
+  // igual a cada frame é recálculo de estilo à toa (pesa no celular)
+  type Item = { selo?: HTMLElement; rot: HTMLElement; so?: string; sz?: string; ro?: string };
+  const itens = new Map<string, Item>();
   for (const a of h.ancoras()) {
     const rot = document.createElement("span");
     rot.className = a.id === "empresa" ? "olabel olabel--sun" : "olabel";
@@ -46,6 +53,8 @@ export async function montarOrbita(canvas: HTMLCanvasElement, camada: HTMLElemen
   h.scene.onAfterRenderObservable.add(() => {
     const w = canvas.clientWidth;
     const cel = celular.matches;
+    // o selo tem tamanho fixo no CSS (o MAX) e encolhe por scale: mexer em
+    // width/height a cada frame forçava layout da camada inteira
     const [MIN, MAX] = cel ? [20, 34] : [28, 52];
     const lista = h.ancoras();
     const sol = lista.find((a) => a.id === "empresa");
@@ -67,22 +76,24 @@ export async function montarOrbita(canvas: HTMLCanvasElement, camada: HTMLElemen
           !!sol?.centro && !!solC && !!cam &&
           Vector3.Distance(cam, a.centro) > Vector3.Distance(cam, sol.centro) &&
           dist(c, solC) < solR + tam * 0.35;
-        it.selo.style.transform = `translate3d(${c.x}px, ${c.y}px, 0) translate(-50%, -50%)`;
-        it.selo.style.width = it.selo.style.height = `${tam}px`;
-        it.selo.style.opacity = atras ? "0" : String(0.72 + 0.28 * (a.frente ?? 1));
-        it.selo.style.zIndex = String(Math.round((a.frente ?? 1) * 10));
+        it.selo.style.transform = `translate3d(${c.x.toFixed(1)}px, ${c.y.toFixed(1)}px, 0) translate(-50%, -50%) scale(${(tam / MAX).toFixed(3)})`;
+        const so = atras ? "0" : (0.72 + 0.28 * (a.frente ?? 1)).toFixed(2);
+        if (so !== it.so) it.selo.style.opacity = it.so = so;
+        const sz = String(Math.round((a.frente ?? 1) * 10));
+        if (sz !== it.sz) it.selo.style.zIndex = it.sz = sz;
         x = c.x;
         yRot = c.y - tam / 2;
       }
       const minVis = cel ? 0.7 : 0;
       const vis = a.visivel < minVis && a.id !== "empresa" ? 0 : a.visivel;
       if (vis < 0.02) {
-        it.rot.style.opacity = "0";
+        if (it.ro !== "0") it.rot.style.opacity = it.ro = "0";
         continue;
       }
       const xr = Math.min(w - 40, Math.max(40, x));
-      it.rot.style.transform = `translate3d(${xr}px, ${yRot}px, 0) translate(-50%, calc(-100% - 5px))`;
-      it.rot.style.opacity = String(vis);
+      it.rot.style.transform = `translate3d(${xr.toFixed(1)}px, ${yRot.toFixed(1)}px, 0) translate(-50%, calc(-100% - 5px))`;
+      const ro = vis.toFixed(2);
+      if (ro !== it.ro) it.rot.style.opacity = it.ro = ro;
     }
   });
 

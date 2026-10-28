@@ -9,6 +9,8 @@ const $$ = <T extends Element = HTMLElement>(s: string, r: ParentNode = document
   Array.from(r.querySelectorAll(s)) as T[];
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const suave = (t: number) => t * t * (3 - 2 * t);
+const ocioso = (fn: () => void) =>
+  "requestIdleCallback" in window ? requestIdleCallback(fn, { timeout: 600 }) : setTimeout(fn, 60);
 
 /* ---------- links ---------- */
 for (const a of $$<HTMLAnchorElement>("[data-wa]")) {
@@ -95,9 +97,30 @@ function duplicar(row: HTMLElement, inner: HTMLElement) {
     }
   });
 }
-for (const row of $$("[data-marquee]")) duplicar(row, $(".marquee__inner", row)!);
-for (const row of $$("[data-srow]")) duplicar(row, $(".srow__inner", row)!);
-if (rail) duplicar(rail, $(".ads__track", rail)!);
+// duplicar mede a largura a cada cópia (layout da página inteira por volta):
+// na abertura isso atrasava a primeira pintura. As faixas ficam bem abaixo da
+// dobra, então duplicam depois do load, uma por tarefa ociosa, e só andam
+// (`is-run`) duplicadas E na tela.
+const faixas: [HTMLElement, HTMLElement][] = [
+  ...$$("[data-marquee]").map((r) => [r, $(".marquee__inner", r)!] as [HTMLElement, HTMLElement]),
+  ...$$("[data-srow]").map((r) => [r, $(".srow__inner", r)!] as [HTMLElement, HTMLElement]),
+  ...(rail ? [[rail, $(".ads__track", rail)!] as [HTMLElement, HTMLElement]] : []),
+];
+const faixaIO = new IntersectionObserver(
+  (es) => {
+    for (const e of es) e.target.querySelector(".is-dup")?.classList.toggle("is-run", e.isIntersecting);
+  },
+  { rootMargin: "200px 0px" }
+);
+function duplicarFaixas() {
+  const prox = faixas.shift();
+  if (!prox) return;
+  const [row, inner] = prox;
+  duplicar(row, inner);
+  inner.classList.add("is-dup");
+  faixaIO.observe(row);
+  ocioso(duplicarFaixas);
+}
 
 /* ---------- painel: abas, contadores e gráfico ---------- */
 type Dados = (typeof DASH)["meta"];
@@ -147,7 +170,8 @@ function animarPara(alvo: Dados, dur = 1300) {
   requestAnimationFrame(passo);
 }
 if (dash) {
-  pintarPainel(mostrado);
+  // Intl pt-BR na 1ª chamada carrega dados de localidade: fora da abertura
+  ocioso(() => pintarPainel(mostrado));
   let auto: number | undefined;
   let tocou = false;
   const tabs = $$<HTMLButtonElement>("[data-tab]", dash);
@@ -257,8 +281,11 @@ function quadro() {
   requestAnimationFrame(quadro);
 }
 
-medir();
-quadro();
+// 1ª medição no quadro: o layout forçado aqui é o mesmo que a pintura faria
+requestAnimationFrame(() => {
+  medir();
+  quadro();
+});
 addEventListener("resize", () => {
   medir();
   ultimoY = -1;
@@ -276,6 +303,7 @@ function depoisDoLoad(fn: () => void) {
 depoisDoLoad(() => {
   medir();
   ultimoY = -1;
+  ocioso(duplicarFaixas);
   import("./sky").then((m) => m.ceu($<HTMLCanvasElement>(".sky")!, reduz));
   if (!reduz) {
     import("lenis").then(({ default: Lenis }) => {
@@ -327,18 +355,20 @@ depoisDoLoad(() => {
           ouvirOrbita((p) => h.progresso(p));
         })
         .catch((err) => console.warn("3D indisponível, fica o pôster", err));
-    // celular: espera um pouco ou o primeiro toque; computador: sobe logo após o load
-    if (desktop.matches) ir();
-    else {
-      let foi = false;
-      const uma = () => {
-        if (foi) return;
-        foi = true;
-        ir();
-      };
-      setTimeout(uma, 2500);
-      addEventListener("touchstart", uma, { once: true, passive: true });
-      addEventListener("scroll", uma, { once: true, passive: true });
-    }
+    // o 3D sobe no primeiro sinal de gente (mouse mexendo, toque, rolagem): o
+    // pôster é o mesmo quadro, a troca não aparece. Montar sozinho logo após o
+    // load travava a tela por ~1 s (Babylon + shaders). No computador o mouse
+    // mexe quase na hora; a reserva cobre quem abre e fica só olhando (tarde de
+    // propósito: trocar o pôster pelo 3D aos 7 s contava como página ainda
+    // carregando e derrubava a nota do computador).
+    let foi = false;
+    const uma = () => {
+      if (foi) return;
+      foi = true;
+      ir();
+    };
+    setTimeout(uma, 12000);
+    for (const ev of ["pointermove", "touchstart", "pointerdown", "scroll", "wheel", "keydown"])
+      addEventListener(ev, uma, { once: true, passive: true });
   }
 });

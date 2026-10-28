@@ -432,7 +432,16 @@ html.js .is-on .swash path {
   box-shadow:
     0 0 0 3px rgba(0, 242, 222, 0.06),
     0 6px 22px -6px rgba(0, 89, 252, 0.7);
-  will-change: transform, width, height;
+  /* tamanho = o MAX do hero3d.ts; o tamanho do planeta vem por scale */
+  width: 52px;
+  height: 52px;
+  will-change: transform;
+}
+@media (max-width: 960px) {
+  .oseal {
+    width: 34px;
+    height: 34px;
+  }
 }
 .oseal svg {
   width: 56%;
@@ -1045,6 +1054,18 @@ h1.orbit__t.is-on {
 }
 .marquee:hover .marquee__inner {
   animation-play-state: paused;
+}
+/* faixa só anda duplicada e na tela (main.ts põe is-run); antes disso fica
+   parada na 1ª cópia, que já cobre a largura */
+.ads__track,
+.srow__inner,
+.marquee__inner {
+  animation-play-state: paused;
+}
+.ads__track.is-run,
+.srow__inner.is-run,
+.marquee__inner.is-run {
+  animation-play-state: running;
 }
 @keyframes mq {
   to {
