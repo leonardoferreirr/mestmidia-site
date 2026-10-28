@@ -4,7 +4,7 @@
 // Regra que descobri na marra: acento1 e acento2 precisam ser DIFERENTES
 // em matiz, senao o objeto le como uma mancha unica sem volume.
 
-import { Color3 } from "@babylonjs/core";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 import type { Paleta } from "./types";
 
 const c = (hex: string) => Color3.FromHexString(hex);

@@ -369,7 +369,7 @@ html.js .is-on .swash path {
   left: 0;
   right: 0;
   top: 19vh;
-  bottom: 3vh;
+  bottom: 21vh;
 }
 .orbit__poster,
 .orbit__canvas {
@@ -380,6 +380,7 @@ html.js .is-on .swash path {
 }
 .orbit__poster {
   object-fit: contain;
+  mix-blend-mode: screen; /* fundo preto do pôster some sobre o céu */
   transition: opacity 0.8s var(--ease-out);
 }
 .orbit__canvas {
@@ -398,6 +399,11 @@ html.js .is-on .swash path {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.8s var(--ease-out);
+}
+.orbit.is-live .orbit__labels {
+  opacity: 1;
 }
 /* rótulos dos planetas: texto limpo, sem caixinha, como no Lab */
 .olabel {
@@ -412,6 +418,25 @@ html.js .is-on .swash path {
   white-space: nowrap;
   opacity: 0;
   will-change: transform, opacity;
+}
+/* selo do planeta: a logo do canal num disco escuro, do tamanho do planeta */
+.oseal {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: radial-gradient(circle at 35% 30%, #182133, #070a11 70%);
+  box-shadow:
+    0 0 0 3px rgba(0, 242, 222, 0.06),
+    0 6px 22px -6px rgba(0, 89, 252, 0.7);
+  will-change: transform, width, height;
+}
+.oseal svg {
+  width: 56%;
+  height: 56%;
 }
 .olabel--sun {
   font-size: 0.9rem;

@@ -46,7 +46,10 @@
       <section class="orbit" data-orbit aria-label="Apresentação">
         <div class="orbit__stage">
           <div class="orbit__scene" data-orbit-scene>
-            <img class="orbit__poster" src="/assets/orbit-poster.webp" alt="" width="1200" height="1200" fetchpriority="low" />
+            <picture>
+              <source media="(max-width: 960px)" srcset="/assets/orbit-poster-m.webp" width="390" height="406" />
+              <img class="orbit__poster" src="/assets/orbit-poster.webp" alt="" width="1440" height="540" decoding="async" />
+            </picture>
             <canvas class="orbit__canvas" data-orbit-canvas aria-hidden="true"></canvas>
             <div class="orbit__labels" data-orbit-labels aria-hidden="true"></div>
           </div>

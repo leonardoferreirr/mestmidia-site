@@ -43,22 +43,21 @@
 // transformacao (no grafico eles viram pontos anonimos, o eixo x e tempo); o do
 // sol volta quando ele chega no pico — "seu negocio" no topo do grafico.
 
-import {
-  Scene,
-  Mesh,
-  MeshBuilder,
-  PBRMaterial,
-  StandardMaterial,
-  TransformNode,
-  Matrix,
-  Quaternion,
-  Vector3,
-  Color3,
-  Constants,
-  DynamicTexture,
-  FresnelParameters,
-  VertexBuffer,
-} from "@babylonjs/core";
+// Imports profundos de propósito: "@babylonjs/core" na raiz arrasta o Babylon
+// inteiro (4,4 MB no bundle). Só o que a peça usa.
+import { Scene } from "@babylonjs/core/scene";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { Matrix, Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Constants } from "@babylonjs/core/Engines/constants";
+import { DynamicTexture } from "@babylonjs/core/Materials/Textures/dynamicTexture";
+import { FresnelParameters } from "@babylonjs/core/Materials/fresnelParameters";
+import { VertexBuffer } from "@babylonjs/core/Buffers/buffer";
+import "@babylonjs/core/Meshes/thinInstanceMesh"; // thinInstanceSetBuffer
 import type { Objeto3D, Paleta, Ancora } from "../types";
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -392,7 +391,7 @@ export const sistemaOrbital: Objeto3D = {
         omega: KEPLER * Math.pow(raio, -1.5),
         slot: slotDe[i],
         aro,
-        ancora: { id: pl.id, nome: pl.nome, pos: new Vector3(), visivel: 1 } as Ancora,
+        ancora: { id: pl.id, nome: pl.nome, pos: new Vector3(), visivel: 1, centro: new Vector3(), frente: 1 } as Ancora,
       };
     });
 
@@ -465,7 +464,7 @@ export const sistemaOrbital: Objeto3D = {
     const vTopo = new Vector3();
     const umV = new Vector3(1, 1, 1);
     const alvos = Array.from({ length: NP }, () => new Vector3());
-    const ancoraSol: Ancora = { id: SOL.id, nome: SOL.nome, pos: new Vector3(), visivel: 1 };
+    const ancoraSol: Ancora = { id: SOL.id, nome: SOL.nome, pos: new Vector3(), visivel: 1, centro: new Vector3() };
     const ancoras: Ancora[] = [...planetas.map((pl) => pl.ancora), ancoraSol];
 
     let eAtual = 0;
@@ -495,10 +494,12 @@ export const sistemaOrbital: Objeto3D = {
         // atual: o root gira com o mouse.
         const wm = root.computeWorldMatrix(true);
         for (const pl of planetas) {
+          Vector3.TransformCoordinatesToRef(pl.m.position, wm, pl.ancora.centro!);
           vTopo.copyFrom(pl.m.position);
           vTopo.y += pl.m.scaling.y;
           Vector3.TransformCoordinatesToRef(vTopo, wm, pl.ancora.pos);
         }
+        Vector3.TransformCoordinatesToRef(sol.position, wm, ancoraSol.centro!);
         vTopo.copyFrom(sol.position);
         vTopo.y += sol.scaling.y;
         Vector3.TransformCoordinatesToRef(vTopo, wm, ancoraSol.pos);
@@ -591,6 +592,7 @@ export const sistemaOrbital: Objeto3D = {
           // tem profundidade e o texto chapado em cima dela achata a cena)
           const frente = 0.5 - 0.5 * Math.sin(ang);
           pl.ancora.visivel = kRotulo * (0.55 + 0.45 * frente);
+          pl.ancora.frente = frente;
         }
 
         // ---- ato 4: o sol vai pro pico ----

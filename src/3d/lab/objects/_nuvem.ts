@@ -14,17 +14,16 @@
 // Quem importa este motor declara "src/objects/_nuvem.ts" no campo `arquivos`,
 // senao o snippet manda copiar so o objeto e o cliente quebra.
 
-import {
-  Scene,
-  Mesh,
-  MeshBuilder,
-  PBRMaterial,
-  Matrix,
-  Quaternion,
-  Vector3,
-  Color3,
-  TransformNode,
-} from "@babylonjs/core";
+// Imports profundos de propósito: "@babylonjs/core" na raiz arrasta o Babylon
+// inteiro (4,4 MB no bundle). Só o que a peça usa.
+import { Scene } from "@babylonjs/core/scene";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
+import { Matrix, Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import "@babylonjs/core/Meshes/thinInstanceMesh";
 import type { Paleta, Frame } from "../types";
 
 const TAU = Math.PI * 2;

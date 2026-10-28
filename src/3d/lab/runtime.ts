@@ -8,20 +8,18 @@
 //   const h = montarObjeto(canvas, prismaRadial, { paleta: "navy", modo: ["auto","mouse"] });
 //   // h.dispose() quando desmontar
 
-import {
-  Engine,
-  Scene,
-  Vector3,
-  Color3,
-  Color4,
-  FreeCamera,
-  HemisphericLight,
-  DirectionalLight,
-  GlowLayer,
-  ImageProcessingConfiguration,
-  Texture,
-  Matrix,
-} from "@babylonjs/core";
+// Imports profundos de propósito: "@babylonjs/core" na raiz arrasta o Babylon
+// inteiro (4,4 MB no bundle). Só o que a peça usa.
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { Scene } from "@babylonjs/core/scene";
+import { Vector3, Matrix } from "@babylonjs/core/Maths/math.vector";
+import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
+import { FreeCamera } from "@babylonjs/core/Cameras/freeCamera";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
+import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
+import { ImageProcessingConfiguration } from "@babylonjs/core/Materials/imageProcessingConfiguration";
+import { Texture } from "@babylonjs/core/Materials/Textures/texture";
 import type { Objeto3D, ObjetoMontado, Paleta, Frame, Ancora } from "./types";
 import { paletaPorId } from "./palettes";
 

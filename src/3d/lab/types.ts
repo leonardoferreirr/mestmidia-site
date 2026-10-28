@@ -84,6 +84,12 @@ export type Ancora = {
   pos: Vector3;
   /** 0..1: o host usa como opacidade. 0 = rotulo nao deve aparecer. */
   visivel: number;
+  /** centro do corpo em coordenada de MUNDO (opcional). Com `pos` (o topo), o
+   *  host mede o raio NA TELA e encaixa um selo HTML do tamanho do corpo
+   *  (ex.: a logo do canal em cima do planeta). */
+  centro?: Vector3;
+  /** 0..1: quanto o corpo esta na frente (1) ou atras (0) do disco. */
+  frente?: number;
 };
 
 export type CustoGPU = "leve" | "medio" | "pesado";
